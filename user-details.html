@@ -45,7 +45,7 @@
             }
 
             try {
-                const response = await fetch('http://localhost:3000/api/user-details', {
+                const response = await fetch('https://heal-her-backend-8u7w.onrender.com/api/user-details', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ userId, fullName, age, height, weight })
