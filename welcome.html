@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Welcome to HealHer</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <!-- Shared styles -->
+    <link rel="stylesheet" href="style.css">
+
+    <style>
+        body {
+            background: linear-gradient(180deg, #fde2ea, #ffffff);
+        }
+
+        .welcome-card {
+            background: white;
+            width: 320px;
+            padding: 30px;
+            border-radius: 18px;
+            text-align: center;
+            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.12);
+            animation: fadeIn 1.2s ease;
+        }
+
+        .welcome-card h1 {
+            color: #880e4f;
+            margin-bottom: 10px;
+        }
+
+        .welcome-card p {
+            font-size: 14px;
+            color: #6a1b9a;
+            line-height: 1.6;
+            margin-bottom: 25px;
+        }
+
+        .welcome-card button {
+            background: #c2185b;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 25px;
+            font-size: 14px;
+            cursor: pointer;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="welcome-card">
+        <h1>Welcome to HealHer 🌸</h1>
+        <p>
+            HealHer is your personal wellness companion designed
+            to help you understand your body, track your cycle,
+            and identify early signs of PCOD/PCOS through simple insights.
+        </p>
+
+        <button onclick="startQuestionnaire()">Start Assessment</button>
+    </div>
+
+    <script>
+        const userId = localStorage.getItem('userId');
+        if (!userId) {
+            window.location.href = "login.html";
+        }
+
+        function startQuestionnaire() {
+            window.location.href = "period-tracking.html";
+        }
+    </script>
+
+</body>
+
+</html>

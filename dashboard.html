@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <title>HealHer Dashboard</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <style>
+    :root {
+      --pink-dark: #f06292;
+      --pink-light: #fde2ea;
+      --deep: #880e4f;
+    }
+
+    body {
+      margin: 0;
+      font-family: 'Segoe UI', sans-serif;
+      background: linear-gradient(180deg, var(--pink-light), #ffffff);
+    }
+
+    /* HEADER */
+    .header {
+      background: linear-gradient(180deg, var(--pink-dark), #f8bbd0);
+      padding: 24px 20px 90px;
+      color: white;
+      border-bottom-left-radius: 40px;
+      border-bottom-right-radius: 40px;
+    }
+
+    .header h2 {
+      margin: 0;
+      font-size: 22px;
+    }
+
+    .header p {
+      font-size: 14px;
+      opacity: 0.9;
+    }
+
+    /* CYCLE CARD */
+    .cycle-card {
+      background: white;
+      margin: -60px 18px 20px;
+      padding: 24px;
+      border-radius: 26px;
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
+      text-align: center;
+    }
+
+    .cycle-card h1 {
+      margin: 0;
+      font-size: 30px;
+      color: var(--deep);
+    }
+
+    .cycle-card p {
+      margin-top: 8px;
+      font-size: 14px;
+      color: #555;
+    }
+
+    .cycle-card button {
+      margin-top: 16px;
+      padding: 12px 26px;
+      border: none;
+      border-radius: 30px;
+      background: linear-gradient(90deg, var(--pink-dark), var(--deep));
+      color: white;
+      cursor: pointer;
+    }
+
+    /* SECTION */
+    .section-title {
+      margin: 24px 18px 12px;
+      font-weight: 600;
+      color: var(--deep);
+    }
+
+    /* ACTION GRID */
+    .actions {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 14px;
+      padding: 0 18px;
+    }
+
+    .action {
+      background: linear-gradient(160deg, #ffffff, #ffeef5);
+      padding: 18px;
+      border-radius: 20px;
+      text-align: center;
+      box-shadow: 0 10px 20px rgba(0, 0, 0, 0.08);
+      cursor: pointer;
+      transition: 0.3s;
+    }
+
+    .action:hover {
+      transform: translateY(-5px);
+    }
+
+    .action span {
+      display: block;
+      margin-top: 8px;
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--deep);
+    }
+
+    /* INSIGHT */
+    .insight {
+      margin: 24px 18px 90px;
+      padding: 20px;
+      background: linear-gradient(180deg, #fff, #fff0f6);
+      border-radius: 22px;
+      box-shadow: 0 12px 25px rgba(0, 0, 0, 0.1);
+    }
+
+    .insight h4 {
+      margin: 0;
+      color: var(--deep);
+    }
+
+    .insight p {
+      margin-top: 8px;
+      font-size: 14px;
+      color: #555;
+    }
+
+    /* BOTTOM NAV */
+    .nav {
+      position: fixed;
+      bottom: 0;
+      width: 100%;
+      background: white;
+      display: flex;
+      justify-content: space-around;
+      padding: 12px 0;
+      box-shadow: 0 -10px 20px rgba(0, 0, 0, 0.12);
+    }
+
+    .nav div {
+      font-size: 12px;
+      color: #777;
+    }
+
+    .nav .active {
+      color: var(--deep);
+      font-weight: 600;
+    }
+  </style>
+</head>
+
+<body>
+
+  <!-- HEADER -->
+  <div class="header">
+    <h2>Hello 🌸</h2>
+    <p>Today is about caring for yourself</p>
+  </div>
+
+  <!-- CYCLE STATUS -->
+  <div class="cycle-card">
+    <h1 id="cycleDay">Cycle Day 12</h1>
+    <p id="cycleMessage">Fertile window approaching</p>
+    <button onclick="logCycle()">Log / Update Cycle</button>
+  </div>
+
+  <!-- QUICK ACTIONS -->
+  <div class="section-title">Quick Actions</div>
+
+  <div class="actions">
+    <div class="action"><span>🧬 PCOD Assessment</span></div>
+    <div class="action"><span>📅 Cycle Tracker</span></div>
+    <div class="action"><span>📝 Symptoms</span></div>
+    <div class="action"><span>💡 Health Tips</span></div>
+  </div>
+
+  <!-- INSIGHTS -->
+  <div class="insight">
+    <h4>Today’s Insight</h4>
+    <p id="insightText"></p>
+  </div>
+
+  <!-- NAV -->
+  <div class="nav">
+    <div class="active">Home</div>
+    <div>Tracker</div>
+    <div>Insights</div>
+    <div>Profile</div>
+  </div>
+
+  <script>
+    // ------------------ LOGIC ------------------
+
+    // Authentication check
+    const userId = localStorage.getItem('userId');
+    if (!userId) {
+      window.location.href = "login.html";
+    }
+
+    // Fetch user data
+    async function loadUserData() {
+      try {
+        const response = await fetch(`http://localhost:3000/api/user-details/${userId}`);
+
+        if (response.ok) {
+          const data = await response.json();
+          if (data.full_name) {
+            document.querySelector('.header h2').innerText = `Hello ${data.full_name} 🌸`;
+          }
+        } else {
+          console.error('Failed to load user data');
+        }
+      } catch (err) {
+        console.error("Error loading user data:", err);
+      }
+    }
+    loadUserData();
+
+    // Example stored cycle day (later from database)
+    let cycleDay = 12;
+
+    // Set Cycle Day
+    document.getElementById("cycleDay").innerText = "Cycle Day " + cycleDay;
+
+    // Cycle-based insights (Flo-style logic)
+    function getInsight(day) {
+      if (day >= 11 && day <= 15) {
+        return "Your body may be preparing for ovulation. Track symptoms like discharge, energy changes, or mild pain. Irregular ovulation can be an early PCOD indicator.";
+      }
+      if (day <= 5) {
+        return "You may be on your period. Rest, hydrate, and note pain levels. Heavy or irregular bleeding may need attention.";
+      }
+      return "Maintain a balanced routine. Regular sleep and diet support hormonal balance and PCOD prevention.";
+    }
+
+    // Display insight
+    document.getElementById("insightText").innerText = getInsight(cycleDay);
+
+    // Button action (temporary)
+    function logCycle() {
+      alert("Cycle logging feature will be added next.");
+    }
+  </script>
+
+</body>
+
+</html>

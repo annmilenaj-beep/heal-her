@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>HealHer - Login</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<div class="auth-container">
+    <h2>HealHer</h2>
+
+    <!-- Create Account -->
+    <div class="box">
+        <h3>Create Account</h3>
+        <input type="email" id="signupEmail" placeholder="Email">
+        <input type="password" id="signupPassword" placeholder="Password">
+        <input type="password" id="signupConfirm" placeholder="Confirm Password">
+        <button onclick="signUp()">Create Account</button>
+    </div>
+
+    <!-- Login -->
+    <div class="box">
+        <h3>Login</h3>
+        <input type="email" id="loginEmail" placeholder="Email">
+        <input type="password" id="loginPassword" placeholder="Password">
+        <button onclick="login()">Login</button>
+    </div>
+</div>
+
+<script src="auth.js"></script>
+
+</body>
+</html>

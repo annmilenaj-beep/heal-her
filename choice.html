@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>HealHer - Get Started</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <!-- Connect shared styles -->
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <div class="card">
+        <h2>Welcome to HealHer</h2>
+        <p>Choose how you want to continue</p>
+
+        <button onclick="goToSignup()">Create Account</button>
+        <button class="secondary" onclick="goToLogin()">Login</button>
+    </div>
+
+    <script>
+        function goToSignup() {
+            window.location.href = "signup.html";
+        }
+
+        function goToLogin() {
+            window.location.href = "login.html";
+        }
+    </script>
+
+</body>
+</html>

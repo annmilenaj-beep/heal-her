@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Period Tracking - HealHer</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<style>
+body {
+    background: linear-gradient(180deg, #fde2ea, #ffffff);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    font-family: Arial, sans-serif;
+}
+
+.card {
+    background: white;
+    width: 350px;
+    padding: 25px;
+    border-radius: 20px;
+    box-shadow: 0 15px 30px rgba(0,0,0,0.15);
+    text-align: center;
+}
+
+h3 {
+    color: #880e4f;
+    margin-bottom: 20px;
+}
+
+.option {
+    background: #fce4ec;
+    padding: 12px;
+    border-radius: 14px;
+    margin-bottom: 12px;
+    cursor: pointer;
+}
+
+.option.selected {
+    background: #f06292;
+    color: white;
+}
+
+input {
+    width: 100%;
+    padding: 10px;
+    border-radius: 10px;
+    border: 1px solid #ccc;
+}
+
+.button-row {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 20px;
+}
+
+button {
+    width: 48%;
+    padding: 12px;
+    border: none;
+    border-radius: 25px;
+    font-size: 14px;
+    cursor: pointer;
+}
+
+.back-btn {
+    background: #f8bbd0;
+    color: #880e4f;
+}
+
+.continue-btn {
+    background: #c2185b;
+    color: white;
+    opacity: 0.4;
+}
+
+.continue-btn.enabled {
+    opacity: 1;
+}
+</style>
+</head>
+
+<body>
+
+<div class="card" id="card"></div>
+
+<script>
+const questions = [
+    { text: "When was the first day of your last menstrual period?", type: "date" },
+
+    { text: "How long does your period usually last?",
+      options: ["2–3 days", "4–5 days", "6–7 days", "More than 7 days"] },
+
+    { text: "What is your average menstrual cycle length?",
+      type: "number", placeholder: "Example: 28" },
+
+    { text: "Are your periods regular?",
+      options: ["Yes", "No", "Sometimes"] },
+
+    { text: "Do you often miss your periods for one or more months?",
+      options: ["Yes", "No"] },
+
+    { text: "How would you describe your menstrual flow?",
+      options: ["Light", "Normal", "Heavy"] },
+
+    { text: "Do you experience very heavy bleeding or clots?",
+      options: ["Yes", "No"] },
+
+    { text: "Do you experience pain or cramps during periods?",
+      options: ["No pain", "Mild pain", "Moderate pain", "Severe pain"] },
+
+    { text: "Do period symptoms affect your daily activities?",
+      options: ["Yes", "No"] },
+
+    { text: "Have your cycle patterns changed in the last 6 months?",
+      options: ["Yes", "No"] },
+
+    { text: "At what age did you get your first period?",
+      type: "number", placeholder: "Optional" },
+
+    { text: "Have you ever been diagnosed with PCOD/PCOS by a doctor?",
+      options: ["Yes", "No", "Not sure"] }
+];
+
+let index = 0;
+let answers = [];
+let tempAnswer = "";
+
+function render() {
+    const q = questions[index];
+    tempAnswer = answers[index] || "";
+
+    let html = `<h3>${q.text}</h3>`;
+
+    if (q.type) {
+        html += `
+            <input type="${q.type}"
+                   placeholder="${q.placeholder || ""}"
+                   value="${tempAnswer}"
+                   onchange="setAnswer(this.value)">
+        `;
+    }
+
+    if (q.options) {
+        q.options.forEach(opt => {
+            const selected = opt === tempAnswer ? "selected" : "";
+            html += `
+                <div class="option ${selected}"
+                     onclick="setAnswer('${opt}', this)">
+                    ${opt}
+                </div>
+            `;
+        });
+    }
+
+    html += `
+        <div class="button-row">
+            <button class="back-btn" onclick="back()" ${index === 0 ? "disabled" : ""}>
+                Back
+            </button>
+            <button class="continue-btn ${tempAnswer ? "enabled" : ""}"
+                    onclick="next()">
+                Continue
+            </button>
+        </div>
+    `;
+
+    document.getElementById("card").innerHTML = html;
+}
+
+function setAnswer(value, el = null) {
+    tempAnswer = value;
+
+    document.querySelectorAll(".option").forEach(o => o.classList.remove("selected"));
+    if (el) el.classList.add("selected");
+
+    document.querySelector(".continue-btn").classList.add("enabled");
+}
+
+function next() {
+    if (!tempAnswer) return;
+
+    answers[index] = tempAnswer;
+    index++;
+
+    if (index < questions.length) {
+        render();
+    } else {
+        alert("Period tracking completed successfully!");
+        console.log("Answers:", answers);
+        // window.location.href = "next-question-page.html";
+    }
+}
+
+function back() {
+    if (index > 0) {
+        index--;
+        render();
+    }
+}
+
+render();
+</script>
+
+</body>
+</html>

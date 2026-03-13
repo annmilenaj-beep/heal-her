@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Login - HealHer</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <!-- Shared styles -->
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+    <div class="card">
+        <h2>Login</h2>
+        <p>Welcome back to HealHer</p>
+
+        <input type="email" id="email" placeholder="Email" required>
+        <input type="password" id="password" placeholder="Password" required>
+
+        <!-- ONLY redirect happens here -->
+        <button onclick="login()">Login</button>
+
+        <p class="link" onclick="goToSignup()">New user? Create account</p>
+    </div>
+
+    <script>
+        async function login() {
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+
+            if (!email || !password) {
+                alert("Please enter both email and password.");
+                return;
+            }
+
+            try {
+                const response = await fetch('http://localhost:3000/api/login', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email, password })
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    // Success! Save user ID and proceed
+                    localStorage.setItem('userId', data.userId);
+                    window.location.href = "welcome.html";
+                } else {
+                    alert('Login failed: ' + data.error);
+                }
+            } catch (err) {
+                console.error("Login error:", err);
+                alert("An error occurred connecting to the server. Is it running?");
+            }
+        }
+
+        function goToSignup() {
+            window.location.href = "signup.html";
+        }
+    </script>
+
+</body>
+
+</html>

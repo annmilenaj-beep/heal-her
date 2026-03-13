@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Create Account - HealHer</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <!-- Connect shared styles -->
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+    <div class="card">
+        <h2>Create Account</h2>
+        <p>Join HealHer to track your wellness</p>
+
+        <input type="email" id="email" placeholder="Email" required>
+        <input type="password" id="password" placeholder="Password" required>
+        <input type="password" id="confirmPassword" placeholder="Confirm Password" required>
+
+        <!-- Go to next page after signup -->
+        <button onclick="goNext()">Create Account</button>
+
+        <!-- Already have account -->
+        <p class="link" onclick="goToLogin()">Already have an account? Login</p>
+    </div>
+
+    <script>
+        function goToLogin() {
+            window.location.href = "login.html";
+        }
+
+        async function goNext() {
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+            const confirmPassword = document.getElementById('confirmPassword').value;
+
+            if (!email || !password || !confirmPassword) {
+                alert("Please fill in all fields.");
+                return;
+            }
+
+            if (password !== confirmPassword) {
+                alert("Passwords do not match.");
+                return;
+            }
+
+            try {
+                const response = await fetch('http://localhost:3000/api/signup', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email, password })
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    // Success! Save user ID and proceed
+                    localStorage.setItem('userId', data.userId);
+                    window.location.href = "user-details.html";
+                } else {
+                    alert('Signup failed: ' + data.error);
+                }
+            } catch (err) {
+                console.error("Signup error:", err);
+                alert("An error occurred connecting to the server. Is it running?");
+            }
+        }
+    </script>
+
+</body>
+
+</html>

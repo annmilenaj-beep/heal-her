@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Your Details - HealHer</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <!-- Shared styles -->
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+    <div class="card">
+        <h2>Your Details</h2>
+        <p>Help us personalize your experience</p>
+
+        <input type="text" id="fullName" placeholder="Full Name" required>
+        <input type="number" id="age" placeholder="Age" required>
+        <input type="number" id="height" placeholder="Height (cm)" required>
+        <input type="number" id="weight" placeholder="Weight (kg)" required>
+
+        <!-- Form submission happens here -->
+        <button onclick="saveDetails()">Continue</button>
+    </div>
+
+    <script>
+        async function saveDetails() {
+            const fullName = document.getElementById('fullName').value;
+            const age = document.getElementById('age').value;
+            const height = document.getElementById('height').value;
+            const weight = document.getElementById('weight').value;
+            const userId = localStorage.getItem('userId');
+
+            if (!fullName || !age || !height || !weight) {
+                alert("Please fill in all fields.");
+                return;
+            }
+
+            if (!userId) {
+                alert("User session not found. Please log in again.");
+                window.location.href = "login.html";
+                return;
+            }
+
+            try {
+                const response = await fetch('http://localhost:3000/api/user-details', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ userId, fullName, age, height, weight })
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    window.location.href = "welcome.html";
+                } else {
+                    alert('Failed to save details: ' + data.error);
+                }
+            } catch (err) {
+                console.error("Error saving details:", err);
+                alert("An error occurred connecting to the server. Is it running?");
+            }
+        }
+    </script>
+
+</body>
+
+</html>

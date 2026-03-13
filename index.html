@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>HealHer</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <style>
+        body {
+            margin: 0;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background: radial-gradient(circle at center, #fde2ea, #f8bbd0);
+            font-family: Arial, sans-serif;
+            overflow: hidden;
+        }
+
+        .container {
+            text-align: center;
+            animation: zoomFadeIn 1.5s ease-out;
+            transition: transform 1s ease, opacity 1s ease;
+        }
+
+        h1 {
+            font-size: 38px;
+            color: #880e4f;
+            margin: 0;
+            letter-spacing: 1px;
+        }
+
+        p {
+            margin-top: 10px;
+            font-size: 14px;
+            color: #6a1b9a;
+        }
+
+        /* Splash pulse effect */
+        .pulse {
+            position: absolute;
+            width: 220px;
+            height: 220px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.4);
+            animation: pulse 3s infinite;
+        }
+
+        @keyframes zoomFadeIn {
+            from {
+                opacity: 0;
+                transform: scale(0.85);
+            }
+            to {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+
+        @keyframes pulse {
+            0% {
+                transform: scale(0.6);
+                opacity: 0.6;
+            }
+            100% {
+                transform: scale(1.6);
+                opacity: 0;
+            }
+        }
+
+        /* Exit animation */
+        .exit {
+            opacity: 0;
+            transform: scale(1.15);
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Background splash pulse -->
+    <div class="pulse"></div>
+
+    <!-- App title -->
+    <div class="container" id="splash">
+        <h1>HealHer</h1>
+        <p>Your wellness companion</p>
+    </div>
+
+    <script>
+        // Start exit animation after 3 seconds
+        setTimeout(() => {
+            document.getElementById("splash").classList.add("exit");
+        }, 3000);
+
+        // Redirect to choice page after 4 seconds
+        setTimeout(() => {
+            window.location.href = "choice.html";
+        }, 4000);
+    </script>
+
+</body>
+</html>
