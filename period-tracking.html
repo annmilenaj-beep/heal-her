@@ -187,9 +187,8 @@ function next() {
     if (index < questions.length) {
         render();
     } else {
-        alert("Period tracking completed successfully!");
-        console.log("Answers:", answers);
-        // window.location.href = "next-question-page.html";
+        sessionStorage.setItem('periodAnswers', JSON.stringify(answers));
+        window.location.href = "symptom-tracking.html";
     }
 }
 

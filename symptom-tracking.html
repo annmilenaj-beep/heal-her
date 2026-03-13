@@ -1,0 +1,541 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Symptom Tracking - HealHer</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<style>
+body {
+    background: linear-gradient(180deg, #fde2ea, #ffffff);
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    min-height: 100vh;
+    padding: 40px 20px;
+    font-family: Arial, sans-serif;
+    box-sizing: border-box;
+}
+
+.card {
+    background: white;
+    width: 350px;
+    padding: 25px;
+    border-radius: 20px;
+    box-shadow: 0 15px 30px rgba(0,0,0,0.15);
+    text-align: center;
+}
+
+h3 {
+    color: #880e4f;
+    margin-bottom: 20px;
+}
+
+.section-header {
+    font-size: 12px;
+    font-weight: bold;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: #c2185b;
+    background: #fce4ec;
+    padding: 6px 14px;
+    border-radius: 20px;
+    margin-bottom: 16px;
+    display: inline-block;
+}
+
+.option {
+    background: #fce4ec;
+    padding: 12px;
+    border-radius: 14px;
+    margin-bottom: 12px;
+    cursor: pointer;
+}
+
+.option.selected {
+    background: #f06292;
+    color: white;
+}
+
+input {
+    width: 100%;
+    padding: 10px;
+    border-radius: 10px;
+    border: 1px solid #ccc;
+    box-sizing: border-box;
+}
+
+.button-row {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 20px;
+}
+
+button {
+    width: 48%;
+    padding: 12px;
+    border: none;
+    border-radius: 25px;
+    font-size: 14px;
+    cursor: pointer;
+}
+
+.back-btn {
+    background: #f8bbd0;
+    color: #880e4f;
+}
+
+.continue-btn {
+    background: #c2185b;
+    color: white;
+    opacity: 0.4;
+}
+
+.continue-btn.enabled {
+    opacity: 1;
+}
+
+/* Report styles */
+#report-card {
+    width: 380px;
+    text-align: left;
+}
+
+.report-title {
+    font-size: 1.3em;
+    font-weight: bold;
+    color: #880e4f;
+    text-align: center;
+    margin-bottom: 5px;
+}
+
+.report-subtitle {
+    font-size: 0.8em;
+    color: #888;
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+.risk-badge {
+    text-align: center;
+    font-size: 1em;
+    font-weight: bold;
+    padding: 12px 20px;
+    border-radius: 30px;
+    margin-bottom: 20px;
+    display: block;
+}
+
+.risk-low { background: #e8f5e9; color: #2e7d32; }
+.risk-moderate { background: #fff3e0; color: #e65100; }
+.risk-high { background: #fce4ec; color: #880e4f; }
+
+.report-section {
+    background: #fce4ec;
+    border-radius: 14px;
+    padding: 14px;
+    margin-bottom: 14px;
+}
+
+.report-section h4 {
+    color: #880e4f;
+    margin: 0 0 8px 0;
+    font-size: 0.95em;
+}
+
+.report-section ul {
+    margin: 0;
+    padding-left: 18px;
+    font-size: 0.85em;
+    color: #444;
+    line-height: 1.7;
+}
+
+.report-section p {
+    font-size: 0.85em;
+    color: #555;
+    margin: 0;
+    line-height: 1.6;
+}
+
+.disclaimer {
+    background: #f5f5f5;
+    border-radius: 10px;
+    padding: 10px 14px;
+    font-size: 0.75em;
+    color: #888;
+    text-align: center;
+    margin-bottom: 16px;
+    line-height: 1.5;
+}
+
+.dashboard-btn {
+    width: 100%;
+    background: #c2185b;
+    color: white;
+    padding: 14px;
+    border-radius: 25px;
+    font-size: 15px;
+    border: none;
+    cursor: pointer;
+    display: block;
+    text-align: center;
+    margin-top: 10px;
+}
+
+.progress-bar-wrap {
+    width: 100%;
+    background: #fce4ec;
+    border-radius: 10px;
+    height: 6px;
+    margin-bottom: 18px;
+    overflow: hidden;
+}
+
+.progress-bar-fill {
+    height: 6px;
+    background: #c2185b;
+    border-radius: 10px;
+    transition: width 0.3s ease;
+}
+</style>
+</head>
+
+<body>
+
+<div class="card" id="card"></div>
+<div class="card" id="report-card" style="display:none;"></div>
+
+<script>
+const sections = [
+    "🌸 Skin & Hair",
+    "🌸 Skin & Hair",
+    "🌸 Skin & Hair",
+    "🌸 Skin & Hair",
+    "⚖️ Weight & Body",
+    "⚖️ Weight & Body",
+    "💇 Hair Growth & Hormones",
+    "💇 Hair Growth & Hormones",
+    "💭 Emotional & Mental Health",
+    "💭 Emotional & Mental Health",
+    "⚡ Energy & Fatigue",
+    "⚡ Energy & Fatigue",
+    "🏃 Physical Activity",
+    "🏃 Physical Activity",
+    "🌙 Sleep & Routine",
+    "🌙 Sleep & Routine",
+    "🥗 Diet & Hydration",
+    "🥗 Diet & Hydration",
+    "🧘 Stress & Mental Load",
+    "🧘 Stress & Mental Load"
+];
+
+const questions = [
+    // Skin & Hair
+    { text: "How often do you experience acne or pimples?",
+      options: ["Never", "Occasionally", "Frequently", "Almost always"] },
+    { text: "Where do you mostly get acne?",
+      options: ["Face", "Back", "Chest", "Multiple areas"] },
+    { text: "Have you noticed increased hair fall recently?",
+      options: ["No", "Mild", "Moderate", "Severe"] },
+    { text: "Do you experience hair thinning or hair loss on the scalp?",
+      options: ["No", "Slight thinning", "Noticeable thinning"] },
+
+    // Weight & Body Changes
+    { text: "Have you experienced sudden weight gain in the last 6 months?",
+      options: ["No", "Slight", "Moderate", "Significant"] },
+    { text: "Is it difficult for you to lose weight even with diet or exercise?",
+      options: ["Never", "Sometimes", "Often"] },
+
+    // Hair Growth & Hormonal Signs
+    { text: "Do you notice unwanted hair growth in any of these areas?",
+      options: ["Face (upper lip, chin)", "Chest", "Abdomen", "None"],
+      multi: true },
+    { text: "How fast does this unwanted hair growth appear?",
+      options: ["Normal", "Slightly fast", "Very fast"] },
+
+    // Emotional & Mental Health
+    { text: "How often do you experience mood swings?",
+      options: ["Rarely", "Sometimes", "Often", "Very often"] },
+    { text: "Do you feel anxious, low, or emotionally sensitive before periods?",
+      options: ["Never", "Occasionally", "Frequently"] },
+
+    // Energy & Fatigue
+    { text: "How would you describe your daily energy levels?",
+      options: ["High", "Moderate", "Low"] },
+    { text: "Do you feel tired even after proper sleep?",
+      options: ["Never", "Sometimes", "Often"] },
+
+    // Physical Activity
+    { text: "How often do you exercise in a week?",
+      options: ["Never", "1–2 days", "3–4 days", "Daily"] },
+    { text: "What type of physical activity do you mostly do?",
+      options: ["Walking", "Yoga", "Gym", "Sports", "None"] },
+
+    // Sleep & Routine
+    { text: "How many hours do you sleep per night?",
+      options: ["Less than 5", "6–7", "7–8", "More than 8"] },
+    { text: "Do you feel rested after waking up?",
+      options: ["Yes", "Sometimes", "No"] },
+
+    // Diet & Hydration
+    { text: "How would you describe your diet?",
+      options: ["Mostly healthy", "Balanced", "Mostly junk/processed"] },
+    { text: "How many glasses of water do you drink per day?",
+      options: ["Less than 4", "5–7", "8 or more"] },
+
+    // Stress & Mental Load
+    { text: "How stressed do you feel most days?",
+      options: ["Low", "Moderate", "High"] },
+    { text: "What is the main source of your stress?",
+      options: ["Studies/work", "Family", "Health", "Personal reasons"] }
+];
+
+let index = 0;
+let answers = [];
+let tempAnswer = "";
+let multiAnswers = [];
+
+function render() {
+    const q = questions[index];
+    tempAnswer = answers[index] || "";
+    multiAnswers = Array.isArray(answers[index]) ? [...answers[index]] : [];
+
+    const progress = Math.round((index / questions.length) * 100);
+
+    let html = `
+        <div class="progress-bar-wrap">
+            <div class="progress-bar-fill" style="width:${progress}%"></div>
+        </div>
+        <div class="section-header">${sections[index]}</div>
+        <h3>${q.text}</h3>
+    `;
+
+    if (q.multi) {
+        q.options.forEach(opt => {
+            const selected = multiAnswers.includes(opt) ? "selected" : "";
+            html += `
+                <div class="option ${selected}"
+                     onclick="toggleMulti('${opt}', this)">
+                    ${opt}
+                </div>
+            `;
+        });
+    } else if (q.options) {
+        q.options.forEach(opt => {
+            const selected = opt === tempAnswer ? "selected" : "";
+            html += `
+                <div class="option ${selected}"
+                     onclick="setAnswer('${opt}', this)">
+                    ${opt}
+                </div>
+            `;
+        });
+    }
+
+    const hasAnswer = q.multi ? multiAnswers.length > 0 : tempAnswer !== "";
+
+    html += `
+        <div class="button-row">
+            <button class="back-btn" onclick="back()" ${index === 0 ? "disabled" : ""}>
+                Back
+            </button>
+            <button class="continue-btn ${hasAnswer ? "enabled" : ""}"
+                    onclick="next()">
+                Continue
+            </button>
+        </div>
+    `;
+
+    document.getElementById("card").innerHTML = html;
+}
+
+function setAnswer(value, el = null) {
+    tempAnswer = value;
+    document.querySelectorAll(".option").forEach(o => o.classList.remove("selected"));
+    if (el) el.classList.add("selected");
+    document.querySelector(".continue-btn").classList.add("enabled");
+}
+
+function toggleMulti(value, el) {
+    if (value === "None") {
+        multiAnswers = ["None"];
+        document.querySelectorAll(".option").forEach(o => o.classList.remove("selected"));
+        el.classList.add("selected");
+    } else {
+        multiAnswers = multiAnswers.filter(v => v !== "None");
+        if (multiAnswers.includes(value)) {
+            multiAnswers = multiAnswers.filter(v => v !== value);
+            el.classList.remove("selected");
+        } else {
+            multiAnswers.push(value);
+            el.classList.add("selected");
+        }
+    }
+    const hasAnswer = multiAnswers.length > 0;
+    document.querySelector(".continue-btn").classList.toggle("enabled", hasAnswer);
+}
+
+function next() {
+    const q = questions[index];
+    if (q.multi) {
+        if (multiAnswers.length === 0) return;
+        answers[index] = [...multiAnswers];
+    } else {
+        if (!tempAnswer) return;
+        answers[index] = tempAnswer;
+    }
+
+    index++;
+    if (index < questions.length) {
+        render();
+    } else {
+        showReport();
+    }
+}
+
+function back() {
+    if (index > 0) {
+        index--;
+        render();
+    }
+}
+
+// ─── Assistive Report Engine ───────────────────────────────────────────────
+
+function showReport() {
+    const periodAnswers = JSON.parse(sessionStorage.getItem('periodAnswers') || '[]');
+    const symAnswers = answers;
+
+    // Period signals
+    const irregular = ["No", "Sometimes"].includes(periodAnswers[3]);
+    const missesPeriods = periodAnswers[4] === "Yes";
+    const heavyFlow = periodAnswers[5] === "Heavy" || periodAnswers[6] === "Yes";
+    const severePain = ["Moderate pain", "Severe pain"].includes(periodAnswers[7]);
+    const cycleLong = parseInt(periodAnswers[2]) > 35 || parseInt(periodAnswers[2]) < 21;
+    const previousDiagnosis = periodAnswers[11] === "Yes";
+
+    // Symptom signals
+    const frequentAcne = ["Frequently", "Almost always"].includes(symAnswers[0]);
+    const hairFall = ["Moderate", "Severe"].includes(symAnswers[2]);
+    const hairThinning = ["Slight thinning", "Noticeable thinning"].includes(symAnswers[3]);
+    const weightGain = ["Moderate", "Significant"].includes(symAnswers[4]);
+    const hardToLoseWeight = symAnswers[5] === "Often";
+    const unwantedHair = Array.isArray(symAnswers[6]) && !symAnswers[6].includes("None");
+    const fastHairGrowth = symAnswers[7] === "Very fast";
+    const moodSwings = ["Often", "Very often"].includes(symAnswers[8]);
+    const anxiety = symAnswers[9] === "Frequently";
+
+    // Lifestyle signals
+    const lowEnergy = symAnswers[10] === "Low";
+    const alwaysTired = symAnswers[11] === "Often";
+    const noExercise = symAnswers[12] === "Never";
+    const poorSleep = symAnswers[14] === "Less than 5";
+    const notRested = symAnswers[15] === "No";
+    const poorDiet = symAnswers[16] === "Mostly junk/processed";
+    const lowWater = symAnswers[17] === "Less than 4";
+    const highStress = symAnswers[18] === "High";
+
+    // ─── Risk Score ───────────────────────────────────────────────────────
+    let riskScore = 0;
+    if (previousDiagnosis) riskScore += 4;
+    if (irregular) riskScore += 2;
+    if (missesPeriods) riskScore += 2;
+    if (heavyFlow) riskScore += 1;
+    if (cycleLong) riskScore += 1;
+    if (frequentAcne) riskScore += 1;
+    if (unwantedHair) riskScore += 2;
+    if (fastHairGrowth) riskScore += 1;
+    if (hairThinning) riskScore += 1;
+    if (weightGain) riskScore += 1;
+    if (hardToLoseWeight) riskScore += 1;
+    if (moodSwings) riskScore += 1;
+    if (anxiety) riskScore += 1;
+    if (hairFall) riskScore += 1;
+
+    let riskLabel, riskClass, riskMsg;
+    if (previousDiagnosis) {
+        riskLabel = "⚠️ Previously Diagnosed with PCOD/PCOS";
+        riskClass = "risk-high";
+        riskMsg = "Since you've had a prior diagnosis, regular monitoring with your doctor is strongly advised.";
+    } else if (riskScore >= 7) {
+        riskLabel = "🔴 High Likelihood of Hormonal Imbalance / PCOD";
+        riskClass = "risk-high";
+        riskMsg = "Your symptom profile shows several markers commonly associated with PCOD/PCOS. We strongly recommend scheduling a consultation with a gynaecologist.";
+    } else if (riskScore >= 4) {
+        riskLabel = "🟡 Moderate Hormonal Concern";
+        riskClass = "risk-moderate";
+        riskMsg = "You have a few indicators that may suggest hormonal fluctuations. Monitoring your symptoms and speaking to a doctor would be beneficial.";
+    } else {
+        riskLabel = "🟢 Low Concern – Keep Monitoring";
+        riskClass = "risk-low";
+        riskMsg = "Your current symptom profile looks generally healthy. Continue tracking and maintaining a balanced lifestyle.";
+    }
+
+    // ─── Key Insights ────────────────────────────────────────────────────
+    const insights = [];
+    if (missesPeriods || irregular) insights.push("Irregular or missed periods detected — a key PCOD/PCOS indicator.");
+    if (cycleLong) insights.push("Cycle length outside the 21–35 day normal range.");
+    if (frequentAcne && unwantedHair) insights.push("Frequent acne alongside unwanted hair growth can signal elevated androgens (male hormones).");
+    if (hairThinning && hairFall) insights.push("Hair thinning + hair fall together may indicate hormonal disruption.");
+    if (weightGain && hardToLoseWeight) insights.push("Difficulty managing weight despite effort is commonly linked to insulin resistance in PCOS.");
+    if (moodSwings && anxiety) insights.push("Frequent mood swings and emotional sensitivity around periods can be hormone-driven.");
+    if (severePain) insights.push("Severe period pain may warrant further evaluation (e.g., for endometriosis).");
+    if (highStress && (moodSwings || lowEnergy)) insights.push("High stress levels can worsen hormonal imbalance significantly.");
+    if (insights.length === 0) insights.push("No strong individual red flags detected. Continue tracking your cycle regularly.");
+
+    // ─── Lifestyle Recommendations ────────────────────────────────────────
+    const recs = [];
+    if (poorDiet) recs.push("💚 Improve your diet — reduce processed food & increase whole grains, leafy greens, and lean protein.");
+    if (lowWater) recs.push("💧 Increase daily water intake to at least 8 glasses. Hydration supports hormonal regulation.");
+    if (noExercise) recs.push("🏃 Aim for at least 30 minutes of light exercise (walking, yoga) 4–5 days a week.");
+    if (poorSleep || notRested) recs.push("🌙 Prioritise getting 7–8 hours of quality sleep to support cortisol and hormone balance.");
+    if (highStress) recs.push("🧘 Practice stress-reduction techniques like deep breathing, journaling, or meditation daily.");
+    if (lowEnergy || alwaysTired) recs.push("⚡ Persistent fatigue could be linked to thyroid or iron levels — consider a routine blood test.");
+    if (riskScore >= 4) recs.push("🩺 Schedule a gynaecological check-up, and request a hormonal panel (LH, FSH, testosterone, AMH) and pelvic ultrasound.");
+    if (recs.length === 0) recs.push("✅ Your lifestyle looks solid! Keep up your healthy habits and continue monthly tracking.");
+
+    // ─── Build Report HTML ────────────────────────────────────────────────
+    const reportHTML = `
+        <div class="report-title">🌸 Your HealHer Assistive Report</div>
+        <div class="report-subtitle">Based on your Period, Symptom & Lifestyle inputs</div>
+
+        <span class="risk-badge ${riskClass}">${riskLabel}</span>
+        <p style="font-size:0.85em;color:#555;margin-bottom:20px;">${riskMsg}</p>
+
+        <div class="report-section">
+            <h4>🔍 Key Insights</h4>
+            <ul>
+                ${insights.map(i => `<li>${i}</li>`).join('')}
+            </ul>
+        </div>
+
+        <div class="report-section">
+            <h4>💡 Lifestyle Recommendations</h4>
+            <ul>
+                ${recs.map(r => `<li>${r}</li>`).join('')}
+            </ul>
+        </div>
+
+        <div class="disclaimer">
+            ⚠️ This report is for informational purposes only and is <strong>not a medical diagnosis</strong>.
+            Always consult a qualified healthcare professional for medical advice.
+        </div>
+
+        <button class="dashboard-btn" onclick="window.location.href='dashboard.html'">
+            🏠 Go to Dashboard
+        </button>
+    `;
+
+    document.getElementById("card").style.display = "none";
+    const reportCard = document.getElementById("report-card");
+    reportCard.style.display = "block";
+    reportCard.innerHTML = reportHTML;
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+render();
+</script>
+
+</body>
+</html>
