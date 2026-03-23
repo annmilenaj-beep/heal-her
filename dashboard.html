@@ -170,10 +170,10 @@
   <div class="section-title">Quick Actions</div>
 
   <div class="actions">
-    <div class="action"><span>🧬 PCOD Assessment</span></div>
-    <div class="action"><span>📅 Cycle Tracker</span></div>
-    <div class="action"><span>📝 Symptoms</span></div>
-    <div class="action"><span>💡 Health Tips</span></div>
+    <div class="action" onclick="window.location.href='period-tracking.html'"><span>🧬 PCOD Assessment</span></div>
+    <div class="action" onclick="window.location.href='period-tracking.html'"><span>📅 Cycle Tracker</span></div>
+    <div class="action" onclick="window.location.href='symptom-tracking.html'"><span>📝 Symptoms</span></div>
+    <div class="action" onclick="alert('Health tips are coming soon!')"><span>💡 Health Tips</span></div>
   </div>
 
   <!-- INSIGHTS -->
@@ -184,10 +184,10 @@
 
   <!-- NAV -->
   <div class="nav">
-    <div class="active">Home</div>
-    <div>Tracker</div>
-    <div>Insights</div>
-    <div>Profile</div>
+    <div class="active" onclick="window.location.href='dashboard.html'" style="cursor:pointer;">Home</div>
+    <div onclick="window.location.href='period-tracking.html'" style="cursor:pointer;">Tracker</div>
+    <div onclick="alert('Insights coming soon!')" style="cursor:pointer;">Insights</div>
+    <div onclick="window.location.href='user-details.html'" style="cursor:pointer;">Profile</div>
   </div>
 
   <script>
@@ -218,8 +218,25 @@
     }
     loadUserData();
 
-    // Example stored cycle day (later from database)
-    let cycleDay = 12;
+    // Dynamic Cycle Day calculation
+    let cycleDay = 12; // Default fallback
+    const periodAnswers = JSON.parse(sessionStorage.getItem('periodAnswers') || '[]');
+    
+    if (periodAnswers && periodAnswers[0]) {
+      const lastPeriodDate = new Date(periodAnswers[0]);
+      const today = new Date();
+      // Reset times to midnight for accurate day difference
+      lastPeriodDate.setHours(0,0,0,0);
+      today.setHours(0,0,0,0);
+      
+      const diffTime = today - lastPeriodDate;
+      const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24)); 
+      
+      // If the date is valid and in the past or today
+      if (!isNaN(diffDays) && diffDays >= 0) {
+        cycleDay = diffDays + 1; // Day 1 is the day the period started
+      }
+    }
 
     // Set Cycle Day
     document.getElementById("cycleDay").innerText = "Cycle Day " + cycleDay;
@@ -238,9 +255,9 @@
     // Display insight
     document.getElementById("insightText").innerText = getInsight(cycleDay);
 
-    // Button action (temporary)
+    // Button action
     function logCycle() {
-      alert("Cycle logging feature will be added next.");
+      window.location.href = "period-tracking.html";
     }
   </script>
 
