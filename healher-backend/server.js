@@ -188,7 +188,7 @@ app.post('/api/chat', async (req, res) => {
 
         console.log('Sending request to OpenRouter with model:', "nvidia/nemotron-3-super-120b-a12b:free");
         
-        const apiKey = process.env.OPENROUTER_API_KEY ? process.env.OPENROUTER_API_KEY.trim() : null;
+        const apiKey = process.env.OPENROUTER_API_KEY ? process.env.OPENROUTER_API_KEY.replace(/[^a-zA-Z0-9-]/g, '') : null;
         if (!apiKey) {
             console.error("CRITICAL: OPENROUTER_API_KEY is missing from environment variables!");
             return res.status(500).json({ error: "Server configuration error: API key missing." });
