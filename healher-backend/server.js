@@ -239,7 +239,10 @@ app.post('/api/chat', async (req, res) => {
         reqPost.end();
     } catch (error) {
         console.error("Fatal error in /api/chat:", error);
-        res.status(500).json({ error: "Internal server error: " + error.message });
+        res.status(500).json({ 
+            error: "Internal server error: " + error.message,
+            received_headers: req.headers
+        });
     }
 });
 
