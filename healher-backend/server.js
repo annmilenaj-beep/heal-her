@@ -173,66 +173,80 @@ app.post('/api/calculate-period-score', (req, res) => {
 });
 
 // OpenRouter AI Chat Proxy
-app.post('/api/chat', (req, res) => {
-    const { messages } = req.body;
+app.post('/api/chat', async (req, res) => {
+    try {
+        const { messages } = req.body;
 
-    if (!messages || !Array.isArray(messages)) {
-        return res.status(400).json({ error: 'Messages array is required' });
-    }
-
-    const dataPayload = JSON.stringify({
-        "model": "nvidia/nemotron-3-super-120b-a12b:free",
-        "messages": messages
-    });
-
-    console.log('Sending request to OpenRouter with model:', "nvidia/nemotron-3-super-120b-a12b:free");
-    console.log('API Key starts with:', process.env.OPENROUTER_API_KEY ? process.env.OPENROUTER_API_KEY.substring(0, 10) : 'MISSING');
-
-    const options = {
-        hostname: 'openrouter.ai',
-        path: '/api/v1/chat/completions',
-        method: 'POST',
-        headers: {
-            "Authorization": `Bearer ${process.env.OPENROUTER_API_KEY}`,
-            "HTTP-Referer": "https://heal-her.onrender.com/",
-            "X-Title": "HealHer Web App",
-            "Content-Type": "application/json",
-            "Content-Length": Buffer.byteLength(dataPayload)
+        if (!messages || !Array.isArray(messages)) {
+            return res.status(400).json({ error: 'Messages array is required' });
         }
-    };
 
-    console.log('Request Headers:', JSON.stringify(options.headers, null, 2));
+        const dataPayload = JSON.stringify({
+            "model": "nvidia/nemotron-3-super-120b-a12b:free",
+            "messages": messages
+        });
 
-    let responseSent = false;
+        console.log('Sending request to OpenRouter with model:', "nvidia/nemotron-3-super-120b-a12b:free");
+        
+        const apiKey = process.env.OPENROUTER_API_KEY;
+        if (!apiKey) {
+            console.error("CRITICAL: OPENROUTER_API_KEY is missing from environment variables!");
+            return res.status(500).json({ error: "Server configuration error: API key missing." });
+        }
 
-    const reqPost = https.request(options, (resPost) => {
-        let result = '';
-        resPost.on('data', chunk => { result += chunk; });
-        resPost.on('end', () => {
+        const options = {
+            hostname: 'openrouter.ai',
+            path: '/api/v1/chat/completions',
+            method: 'POST',
+            headers: {
+                "Authorization": `Bearer ${apiKey}`,
+                "HTTP-Referer": "https://heal-her.onrender.com/",
+                "X-Title": "HealHer Web App",
+                "Content-Type": "application/json",
+                "Content-Length": Buffer.byteLength(dataPayload)
+            }
+        };
+
+        let responseSent = false;
+
+        const reqPost = https.request(options, (resPost) => {
+            let result = '';
+            resPost.on('data', chunk => { result += chunk; });
+            resPost.on('end', () => {
+                if (responseSent) return;
+                responseSent = true;
+                if (resPost.statusCode >= 400) {
+                    console.error(`OpenRouter Error (${resPost.statusCode}):`, result);
+                    return res.status(resPost.statusCode).json({ error: result });
+                }
+                try {
+                    res.json(JSON.parse(result));
+                } catch (e) {
+                    console.error("Failed to parse OpenRouter response:", result);
+                    res.status(500).json({ error: "Failed to parse AI response" });
+                }
+            });
+        });
+
+        reqPost.on('error', (e) => {
             if (responseSent) return;
             responseSent = true;
-            if (resPost.statusCode >= 400) {
-                console.error(`OpenRouter Error (${resPost.statusCode}):`, result);
-                return res.status(resPost.statusCode).json({ error: result });
-            }
-            try {
-                res.json(JSON.parse(result));
-            } catch (e) {
-                console.error("Failed to parse OpenRouter response:", result);
-                res.status(500).json({ error: "Failed to parse AI response" });
-            }
+            console.error("ChatProxy request error:", e.message);
+            res.status(500).json({ error: 'AI proxy connection failed: ' + e.message });
         });
-    });
 
-    reqPost.on('error', (e) => {
-        if (responseSent) return;
-        responseSent = true;
-        console.error("ChatProxy request error:", e.message);
-        res.status(500).json({ error: 'AI proxy connection failed' });
-    });
+        reqPost.write(dataPayload);
+        reqPost.end();
+    } catch (error) {
+        console.error("Fatal error in /api/chat:", error);
+        res.status(500).json({ error: "Internal server error: " + error.message });
+    }
+});
 
-    reqPost.write(dataPayload);
-    reqPost.end();
+// Global Error Handler
+app.use((err, req, res, next) => {
+    console.error("Unhandled Exception:", err);
+    res.status(500).send("Something went wrong on the server!");
 });
 
 // Start the server
