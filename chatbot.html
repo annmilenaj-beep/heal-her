@@ -203,8 +203,6 @@
   </div>
 
   <script>
-    const OPENROUTER_API_KEY = "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";
-
     const chatContainer = document.getElementById("chatContainer");
     const userInput = document.getElementById("userInput");
 
@@ -232,17 +230,16 @@
       scrollToBottom();
 
       try {
-        const response = await fetch("https://openrouter.ai/api/v1/chat/completions", {
+        const apiHost = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' 
+            ? 'http://localhost:3000' 
+            : 'https://healher-backend.onrender.com';
+            
+        const response = await fetch(`${apiHost}/api/chat`, {
           method: "POST",
           headers: {
-            "Authorization": `Bearer ${OPENROUTER_API_KEY}`,
-            "HTTP-Referer": "https://heal-her.onrender.com/",
-            "X-Title": "HealHer Web App",
             "Content-Type": "application/json"
           },
           body: JSON.stringify({
-             // Using the official OpenRouter xAI grok model ID
-            "model": "x-ai/grok-beta",
             "messages": conversationHistory
           })
         });

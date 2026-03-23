@@ -166,6 +166,43 @@ app.post('/api/calculate-period-score', (req, res) => {
     res.json({ score: score });
 });
 
+// OpenRouter AI Chat Proxy
+app.post('/api/chat', async (req, res) => {
+    const { messages } = req.body;
+    
+    if (!messages) {
+        return res.status(400).json({ error: 'Messages are required' });
+    }
+
+    try {
+        const response = await fetch("https://openrouter.ai/api/v1/chat/completions", {
+            method: "POST",
+            headers: {
+                "Authorization": `Bearer ${process.env.OPENROUTER_API_KEY}`,
+                "HTTP-Referer": "https://heal-her.onrender.com/",
+                "X-Title": "HealHer Web App",
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({
+                "model": "x-ai/grok-beta",
+                "messages": messages
+            })
+        });
+
+        if (!response.ok) {
+            const errorText = await response.text();
+            console.error("OpenRouter API Error:", errorText);
+            return res.status(response.status).json({ error: errorText });
+        }
+
+        const data = await response.json();
+        res.json(data);
+    } catch (err) {
+        console.error("ChatProxy API Error:", err);
+        res.status(500).json({ error: 'Internal server error from AI proxy' });
+    }
+});
+
 // Start the server
 app.get('/api/user-details/:userId', async (req, res) => {
     const { userId } = req.params;
