@@ -236,17 +236,21 @@
           method: "POST",
           headers: {
             "Authorization": `Bearer ${OPENROUTER_API_KEY}`,
+            "HTTP-Referer": "https://heal-her.onrender.com/",
+            "X-Title": "HealHer Web App",
             "Content-Type": "application/json"
           },
           body: JSON.stringify({
-             // Using the requested x-ai/grok model
-            "model": "x-ai/grok-4.20-beta",
+             // Using the official OpenRouter xAI grok model ID
+            "model": "x-ai/grok-beta",
             "messages": conversationHistory
           })
         });
 
         if (!response.ok) {
-            throw new Error(`HTTP error! status: ${response.status}`);
+            const errorText = await response.text();
+            console.error("OpenRouter API Error Details:", errorText);
+            throw new Error(`HTTP error! status: ${response.status} - ${errorText}`);
         }
 
         const data = await response.json();
@@ -262,7 +266,9 @@
       } catch (error) {
         console.error("Chatbot API Error:", error);
         removeTypingIndicator(typingId);
-        appendMessage("Oops! The network seems busy right now. Please check your connection and try again.", "bot");
+        
+        // Inform user about potential issues (e.g. invalid key, model limits, CORS)
+        appendMessage("Oops! The network seems busy right now (or the API key/balance might be invalid). Please check your browser's Developer Console (F12) for the exact error details!", "bot");
       }
       scrollToBottom();
     }
