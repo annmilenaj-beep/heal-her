@@ -439,7 +439,7 @@ async function showReport() {
         // Note: Using standard Render URL if possible or relative if same domain, defaulting to localhost for dev
         const apiHost = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' 
             ? 'http://localhost:3000' 
-            : 'https://healher-backend.onrender.com';
+            : 'https://heal-her-backend-8u7w.onrender.com';
             
         const response = await fetch(`${apiHost}/api/calculate-period-score`, {
             method: 'POST',
