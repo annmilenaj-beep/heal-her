@@ -239,8 +239,8 @@
             "Content-Type": "application/json"
           },
           body: JSON.stringify({
-             // Using a reliable, fast, and free open model for robustness
-            "model": "meta-llama/llama-3.1-8b-instruct:free",
+             // Using the requested x-ai/grok model
+            "model": "x-ai/grok-4.20-beta",
             "messages": conversationHistory
           })
         });
