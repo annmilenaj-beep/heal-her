@@ -18,6 +18,11 @@ pool.connect()
     .then(() => console.log('Connected to PostgreSQL successfully.'))
     .catch(err => console.error('Error connecting to PostgreSQL', err.stack));
 
+// Catch idle pg client errors so they don't crash the Node process
+pool.on('error', (err, client) => {
+    console.error('Unexpected error on idle client', err);
+});
+
 // Middleware
 app.use(cors());
 app.use(express.json());
@@ -226,6 +231,6 @@ app.get('/api/user-details/:userId', async (req, res) => {
     }
 });
 
-app.listen(port, () => {
-    console.log(`Backend server running on http://localhost:${port}`);
+app.listen(port, "0.0.0.0", () => {
+    console.log(`Backend server running on port ${port}`);
 });
