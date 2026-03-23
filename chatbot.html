@@ -230,7 +230,8 @@
       scrollToBottom();
 
       try {
-        const apiHost = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' 
+        const h = window.location.hostname;
+        const apiHost = (h === 'localhost' || h === '127.0.0.1' || h === '') 
             ? 'http://localhost:3000' 
             : 'https://heal-her-backend-8u7w.onrender.com';
             

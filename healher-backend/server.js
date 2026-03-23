@@ -181,9 +181,12 @@ app.post('/api/chat', (req, res) => {
     }
 
     const dataPayload = JSON.stringify({
-        "model": "mistralai/mistral-7b-instruct:free",
+        "model": "nvidia/nemotron-3-super-120b-a12b:free",
         "messages": messages
     });
+
+    console.log('Sending request to OpenRouter with model:', "nvidia/nemotron-3-super-120b-a12b:free");
+    console.log('API Key starts with:', process.env.OPENROUTER_API_KEY ? process.env.OPENROUTER_API_KEY.substring(0, 10) : 'MISSING');
 
     const options = {
         hostname: 'openrouter.ai',
@@ -197,6 +200,8 @@ app.post('/api/chat', (req, res) => {
             "Content-Length": Buffer.byteLength(dataPayload)
         }
     };
+
+    console.log('Request Headers:', JSON.stringify(options.headers, null, 2));
 
     let responseSent = false;
 
