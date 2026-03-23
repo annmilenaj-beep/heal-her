@@ -403,9 +403,58 @@ function back() {
 
 // ─── Assistive Report Engine ───────────────────────────────────────────────
 
-function showReport() {
+async function showReport() {
     const periodAnswers = JSON.parse(sessionStorage.getItem('periodAnswers') || '[]');
     const symAnswers = answers;
+
+    // Map period answers to backend API format
+    let duration = "2-5";
+    if (periodAnswers[1] === "6–7 days") duration = "6-7";
+    else if (periodAnswers[1] === "More than 7 days") duration = ">7";
+
+    let regularity = "yes";
+    if (periodAnswers[3] === "Sometimes") regularity = "sometimes";
+    else if (periodAnswers[3] === "No") regularity = "no";
+
+    let missed = periodAnswers[4] === "Yes" ? "yes" : "no";
+
+    let flow = "normal";
+    if (periodAnswers[5] === "Light" || periodAnswers[5] === "Heavy") flow = "light/heavy";
+
+    let clots = periodAnswers[6] === "Yes" ? "yes" : "no";
+
+    let pain = "mild";
+    if (periodAnswers[7] === "Moderate pain") pain = "moderate";
+    else if (periodAnswers[7] === "Severe pain") pain = "severe";
+
+    let cycle_change = periodAnswers[9] === "Yes" ? "yes" : "no";
+
+    let pcod = "no";
+    if (periodAnswers[11] === "Yes") pcod = "yes";
+    else if (periodAnswers[11] === "Not sure") pcod = "not_sure";
+
+    let apiScore = 0;
+    try {
+        // Fetch period severity score from backend
+        // Note: Using standard Render URL if possible or relative if same domain, defaulting to localhost for dev
+        const apiHost = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' 
+            ? 'http://localhost:3000' 
+            : 'https://healher-backend.onrender.com';
+            
+        const response = await fetch(`${apiHost}/api/calculate-period-score`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                duration, regularity, missed, flow, clots, pain, cycle_change, pcod
+            })
+        });
+        const data = await response.json();
+        if (data && data.score !== undefined) {
+            apiScore = data.score;
+        }
+    } catch (err) {
+        console.error("Could not fetch period score from backend:", err);
+    }
 
     // Period signals
     const irregular = ["No", "Sometimes"].includes(periodAnswers[3]);
@@ -438,10 +487,12 @@ function showReport() {
 
     // ─── Risk Score ───────────────────────────────────────────────────────
     let riskScore = 0;
+    // Add period severity score calculated by backend
+    riskScore += apiScore;
+
     if (previousDiagnosis) riskScore += 4;
-    if (irregular) riskScore += 2;
-    if (missesPeriods) riskScore += 2;
-    if (heavyFlow) riskScore += 1;
+    // We already accounted for irregular, missesPeriods, heavyFlow from the backend apiScore.
+    // So we avoid double counting them if possible, or just add the other flags:
     if (cycleLong) riskScore += 1;
     if (frequentAcne) riskScore += 1;
     if (unwantedHair) riskScore += 2;
@@ -482,6 +533,14 @@ function showReport() {
     if (moodSwings && anxiety) insights.push("Frequent mood swings and emotional sensitivity around periods can be hormone-driven.");
     if (severePain) insights.push("Severe period pain may warrant further evaluation (e.g., for endometriosis).");
     if (highStress && (moodSwings || lowEnergy)) insights.push("High stress levels can worsen hormonal imbalance significantly.");
+    
+    // Add insight based on calculated API Score
+    if (apiScore >= 5) {
+        insights.push("High Period Severity Score: Your period traits indicate a strong possibility of irregularities.");
+    } else if (apiScore >= 2) {
+        insights.push("Moderate Period Severity Score: Some of your period traits indicate mild irregularities.");
+    }
+    
     if (insights.length === 0) insights.push("No strong individual red flags detected. Continue tracking your cycle regularly.");
 
     // ─── Lifestyle Recommendations ────────────────────────────────────────
