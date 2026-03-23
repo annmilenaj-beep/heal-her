@@ -1,6 +1,7 @@
 const express = require('express');
 const { Pool } = require('pg');
 const cors = require('cors');
+const https = require('https');
 require('dotenv').config();
 
 const app = express();
@@ -179,33 +180,49 @@ app.post('/api/chat', async (req, res) => {
         return res.status(400).json({ error: 'Messages are required' });
     }
 
-    try {
-        const response = await fetch("https://openrouter.ai/api/v1/chat/completions", {
-            method: "POST",
-            headers: {
-                "Authorization": `Bearer ${process.env.OPENROUTER_API_KEY}`,
-                "HTTP-Referer": "https://heal-her.onrender.com/",
-                "X-Title": "HealHer Web App",
-                "Content-Type": "application/json"
-            },
-            body: JSON.stringify({
-                "model": "x-ai/grok-beta",
-                "messages": messages
-            })
-        });
+    const dataPayload = JSON.stringify({
+        "model": "mistralai/mistral-7b-instruct:free",
+        "messages": messages
+    });
 
-        if (!response.ok) {
-            const errorText = await response.text();
-            console.error("OpenRouter API Error:", errorText);
-            return res.status(response.status).json({ error: errorText });
+    const options = {
+        hostname: 'openrouter.ai',
+        path: '/api/v1/chat/completions',
+        method: 'POST',
+        headers: {
+            "Authorization": `Bearer ${process.env.OPENROUTER_API_KEY}`,
+            "HTTP-Referer": "https://heal-her.onrender.com/",
+            "X-Title": "HealHer Web App",
+            "Content-Type": "application/json",
+            "Content-Length": Buffer.byteLength(dataPayload)
         }
+    };
 
-        const data = await response.json();
-        res.json(data);
-    } catch (err) {
-        console.error("ChatProxy API Error:", err);
+    const reqPost = https.request(options, (resPost) => {
+        let result = '';
+        resPost.on('data', chunk => {
+            result += chunk;
+        });
+        resPost.on('end', () => {
+            if (resPost.statusCode >= 400) {
+                console.error("OpenRouter API Error:", result);
+                return res.status(resPost.statusCode).json({ error: result });
+            }
+            try {
+                res.json(JSON.parse(result));
+            } catch(e) {
+                res.status(500).json({ error: "Failed to parse API response" });
+            }
+        });
+    });
+
+    reqPost.on('error', (e) => {
+        console.error("ChatProxy API Error:", e);
         res.status(500).json({ error: 'Internal server error from AI proxy' });
-    }
+    });
+
+    reqPost.write(dataPayload);
+    reqPost.end();
 });
 
 // Start the server
