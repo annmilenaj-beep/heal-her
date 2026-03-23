@@ -173,11 +173,11 @@ app.post('/api/calculate-period-score', (req, res) => {
 });
 
 // OpenRouter AI Chat Proxy
-app.post('/api/chat', async (req, res) => {
+app.post('/api/chat', (req, res) => {
     const { messages } = req.body;
-    
-    if (!messages) {
-        return res.status(400).json({ error: 'Messages are required' });
+
+    if (!messages || !Array.isArray(messages)) {
+        return res.status(400).json({ error: 'Messages array is required' });
     }
 
     const dataPayload = JSON.stringify({
@@ -198,27 +198,32 @@ app.post('/api/chat', async (req, res) => {
         }
     };
 
+    let responseSent = false;
+
     const reqPost = https.request(options, (resPost) => {
         let result = '';
-        resPost.on('data', chunk => {
-            result += chunk;
-        });
+        resPost.on('data', chunk => { result += chunk; });
         resPost.on('end', () => {
+            if (responseSent) return;
+            responseSent = true;
             if (resPost.statusCode >= 400) {
-                console.error("OpenRouter API Error:", result);
+                console.error(`OpenRouter Error (${resPost.statusCode}):`, result);
                 return res.status(resPost.statusCode).json({ error: result });
             }
             try {
                 res.json(JSON.parse(result));
-            } catch(e) {
-                res.status(500).json({ error: "Failed to parse API response" });
+            } catch (e) {
+                console.error("Failed to parse OpenRouter response:", result);
+                res.status(500).json({ error: "Failed to parse AI response" });
             }
         });
     });
 
     reqPost.on('error', (e) => {
-        console.error("ChatProxy API Error:", e);
-        res.status(500).json({ error: 'Internal server error from AI proxy' });
+        if (responseSent) return;
+        responseSent = true;
+        console.error("ChatProxy request error:", e.message);
+        res.status(500).json({ error: 'AI proxy connection failed' });
     });
 
     reqPost.write(dataPayload);
